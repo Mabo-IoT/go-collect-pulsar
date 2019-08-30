@@ -1,0 +1,5 @@
+logs/
+vendor/
+build/
+.vscode/
+.idea/
