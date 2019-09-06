@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/apache/pulsar/pulsar-client-go/pulsar"
+	"github.com/mabo-iot/go-collect-pulsar/util"
 	"log"
 	"runtime"
 	"time"
@@ -20,16 +21,17 @@ func main() {
 		log.Fatalf("Could not instantiate Pulsar client: %v", err)
 	}
 
-	SendMessage(client)
-	RecvMessage(client)
+	for {
+		SendMessage(client)
+	}
+	// RecvMessage(client)
 
-	time.Sleep(10 * time.Second)
 }
 
 func SendMessage(client pulsar.Client) {
 	ctx := context.Background()
 	producer, err := client.CreateProducer(pulsar.ProducerOptions{
-		Topic: "topic",
+		Topic: "topic-1",
 	})
 
 	if err != nil {
@@ -38,40 +40,44 @@ func SendMessage(client pulsar.Client) {
 
 	defer producer.Close()
 
+	data := util.Generate()
+
 	msg := pulsar.ProducerMessage{
-		Payload: []byte("Hello, Pulsar"),
+		Payload: data,
 	}
 
 	if err := producer.Send(ctx, msg); err != nil {
 		log.Fatalf("Producer could not send message: %v", err)
 	}
+	fmt.Println("send message to topic")
+	time.Sleep(1 * time.Second)
 }
 
-func RecvMessage(client pulsar.Client) {
-	msgChannel := make(chan pulsar.ConsumerMessage, 1)
+// func RecvMessage(client pulsar.Client) {
+// 	msgChannel := make(chan pulsar.ConsumerMessage, 1)
 
-	consumerOpts := pulsar.ConsumerOptions{
-		Topic:            "topic",
-		SubscriptionName: "my-subscription-1",
-		Type:             pulsar.Exclusive,
-		MessageChannel:   msgChannel,
-	}
+// 	consumerOpts := pulsar.ConsumerOptions{
+// 		Topic:            "topic",
+// 		SubscriptionName: "my-subscription-1",
+// 		Type:             pulsar.Exclusive,
+// 		MessageChannel:   msgChannel,
+// 	}
 
-	consumer, err := client.Subscribe(consumerOpts)
+// 	consumer, err := client.Subscribe(consumerOpts)
 
-	if err != nil {
-		log.Fatalf("Could not establish subscription: %v", err)
-	}
+// 	if err != nil {
+// 		log.Fatalf("Could not establish subscription: %v", err)
+// 	}
 
-	defer consumer.Close()
+// 	defer consumer.Close()
 
-	for cm := range msgChannel {
-		msg := cm.Message
+// 	for cm := range msgChannel {
+// 		msg := cm.Message
 
-		fmt.Printf("Message ID: %s", msg.ID())
-		fmt.Printf("Message value: %s", string(msg.Payload()))
+// 		fmt.Printf("Message ID: %s", msg.ID())
+// 		fmt.Printf("Message value: %s", string(msg.Payload()))
 
-		consumer.Ack(msg)
-	}
+// 		consumer.Ack(msg)
+// 	}
 
-}
+// }

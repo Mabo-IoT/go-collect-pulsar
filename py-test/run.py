@@ -2,13 +2,13 @@ import pulsar
 
 client = pulsar.Client('pulsar://localhost:6650')
 
-producer = client.create_producer('my-topic')
+# producer = client.create_producer('my-topic')
 
-for i in range(10):
-    producer.send(('Hello-%d' % i).encode('utf-8'))
-    print("send message to pulsar")
+# for i in range(10):
+#     producer.send(('Hello-%d' % i).encode('utf-8'))
+#     print("send message to pulsar")
     
-consumer = client.subscribe('my-topic', 'my-subscription')
+consumer = client.subscribe('topic-1', 'my-subscription')
 
 while True:
     msg = consumer.receive()
